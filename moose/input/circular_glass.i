@@ -5,17 +5,6 @@
 #-------------------------------------------------------------------------
 #_* MOOSEHERDER VARIABLES - START
 
-
-# Geometric Properties
-radius = 89e-3   # m
-height = 6.5e-3   # m
-
-# Mesh Properties
-nElemX = 20
-nElemY = 10
-eType = QUAD4 # QUAD4 for 1st order, QUAD8 for 2nd order
-
-
 # Mechanical Props: OFHC Copper 250degC
 mgf2EMod = 138e9      # Pa (between 138 and 141.9)
 mgf2PRatio = 0.271     # Change between 0.271 and 0.276 (values found in literature)
@@ -46,7 +35,6 @@ mgf2PRatio = 0.271     # Change between 0.271 and 0.276 (values found in literat
     num_layers = 20
     bottom_sideset = 'bottom'
     top_sideset = 'top'
-    side_sideset = 'side' 
   []
 []
 
@@ -94,7 +82,7 @@ mgf2PRatio = 0.271     # Change between 0.271 and 0.276 (values found in literat
     type = Pressure
     variable = disp_z
     boundary = 'top'
-    value = -101325.0       # pressure in Pascals (negative for downward)
+    factor = -101325.0       # pressure in Pascals (negative for downward)
     use_displaced_mesh = true
   [../]
 []
@@ -112,22 +100,6 @@ mgf2PRatio = 0.271     # Change between 0.271 and 0.276 (values found in literat
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre    boomeramg'
-[]
-
-
-[Postprocessors]
-    [disp_x_max]
-        type = NodalExtremeValue
-        variable = disp_x
-    []
-    [disp_y_max]
-        type = NodalExtremeValue
-        variable = disp_y
-    []
-    [stress_r]
-    type = ElementAverageValue
-    variable = radial_stress
-  []
 []
 
 [Outputs]
