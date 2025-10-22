@@ -22,9 +22,9 @@ mgf2PRatio = 0.271     # Change between 0.271 and 0.276 (values found in literat
 [Mesh]
   [./circle_base]
     type = ConcentricCircleMeshGenerator
-    radii = '89e-3'
-    rings = '20' 
-    num_sectors = 20 
+    radii = '44.5e-3'
+    rings = '40' 
+    num_sectors = 50 
     has_outer_square = false 
     preserve_volumes = false
   []
@@ -87,6 +87,14 @@ mgf2PRatio = 0.271     # Change between 0.271 and 0.276 (values found in literat
   [../]
 []
 
+[Postprocessors]
+  [./max_disp_z]
+    type = NodalExtremeValue
+    variable = disp_z
+  []
+[]
+
+
 
 [Preconditioning]
     [smp]
@@ -103,5 +111,6 @@ mgf2PRatio = 0.271     # Change between 0.271 and 0.276 (values found in literat
 []
 
 [Outputs]
-    exodus = true
+  console = true
+  exodus = true
 []
