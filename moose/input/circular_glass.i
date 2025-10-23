@@ -82,7 +82,7 @@ mgf2PRatio = 0.271     # Change between 0.271 and 0.276 (values found in literat
     type = Pressure
     variable = disp_z
     boundary = 'top'
-    factor = -101325.0       # pressure in Pascals (negative for downward)
+    factor = -101325      # pressure in Pascals (negative for downward)
     use_displaced_mesh = true
   [../]
 []
