@@ -57,7 +57,7 @@ render_mesh1 = sens.create_render_mesh(sim_data1,
                                         field_disp_keys=disp_comps)
 
 render_mesh2 = sens.create_render_mesh(sim_data2,
-                                        ("disp_y","disp_x"),
+                                        ("disp_z","disp_y","disp_x"),
                                         sim_spat_dim=3,
                                         field_disp_keys=disp_comps)
 # %%
@@ -67,7 +67,7 @@ render_mesh2 = sens.create_render_mesh(sim_data2,
 # (e.g. blenderimages).
 # If no base directory is specified, it will be set as your home directory.
 
-base_dir = Path.cwd()
+base_dir = Path.cwd() / "blender/refract"
 
 # %%
 # Creating the scene
@@ -112,13 +112,13 @@ cam0, cam1 = scene.add_stereo_system(stereo_system)
 stereo_system.save_calibration(base_dir)
 
 light_data = blender.LightData(type=blender.LightType.POINT,
-                                     pos_world=(0, 0, 400),
+                                     pos_world=(200, 0, 200),
                                      rot_world=Rotation.from_euler("xyz",
-                                                                   [0, 0, 0]),
+                                                                   [0, 0.8, 0]),
                                      energy=2)
 light = scene.add_light(light_data)
-light.location = (0, 0, 410)
-light.rotation_euler = (0, 0.75, 0) # NOTE: The default is an XYZ Euler angle
+# light.location = (200, 0, 200)
+# light.rotation_euler = (0, 0.785, 0) # NOTE: The default is an XYZ Euler angle
 
 # Apply the speckle pattern
 material_data = blender.MaterialData()
@@ -137,15 +137,10 @@ scene.add_speckle(part=part,
 bpy.data.materials.new("Material.001")
 bpy.data.materials["Material.001"].use_nodes = True
 mat_nodes = bpy.data.materials["Material.001"].node_tree.nodes
-# mix = mat_nodes.new(type="ShaderNodeMix")
-glass = mat_nodes.new(type="ShaderNodeBsdfGlass")
+glass = mat_nodes.new(type="ShaderNodeBsdfRefraction")
 glass.inputs["IOR"].default_value = 1.3777
-# node_tree = bpy.data.materials["Material.001"].node_tree
-# output = node_tree.nodes.new(type="ShaderNodeOutputMaterial")
-# node_tree.links.new(glass.outputs["Glass"], output.inputs["Surface"])
-
 inp = bpy.data.materials["Material.001"].node_tree.nodes["Material Output"].inputs["Surface"]
-outp = bpy.data.materials["Material.001"].node_tree.nodes["Glass BSDF"].outputs["BSDF"]
+outp = bpy.data.materials["Material.001"].node_tree.nodes["Refraction BSDF"].outputs["BSDF"]
 bpy.data.materials["Material.001"].node_tree.links.new(inp,outp)
 bpy.data.objects["Part.001"].active_material = bpy.data.materials["Material.001"]
 
@@ -163,15 +158,21 @@ render_data = blender.RenderData(cam_data=(stereo_system.cam_data_0,
                                             stereo_system.cam_data_1),
                                 base_dir=base_dir,
                                 threads=8,
-                                samples=50)
+                                samples=40)
 
-scene.render_single_image(render_data=render_data,
-                          stage_image=False)
+
+# scene.render_single_image(render_data=render_data,
+#                           stage_image=False)
+scene.render_deformed_images(render_mesh=render_mesh2,
+                             sim_spat_dim=3,
+                             render_data=render_data,
+                             part=window,
+                             stage_image=False)
 
 
 
 # %%
-# The rendered image will be saved to this filepath:
+# The rendered image will be saved to this filepath: 
 
 print("Save directory of the image:", (render_data.base_dir / "blenderimages"))
 
