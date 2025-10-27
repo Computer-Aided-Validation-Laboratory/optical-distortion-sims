@@ -17,6 +17,7 @@ Test case: mechanical analysis of a plate with a hole loaded in tension.
 import numpy as np
 from scipy.spatial.transform import Rotation
 from pathlib import Path
+import bpy
 
 # Pyvale imports
 import pyvale.sensorsim as sens
@@ -76,40 +77,17 @@ base_dir = Path.cwd()
 # objects and actions necessary are then methods of this class.
 scene = blender.Scene()
 
-# %%
-# The next thing that can be added to the scene is a sample.
-# This is done by passing in the `RenderMeshData` object.
-# It should be noted that the mesh will be centred on the origin to allow for
-# the cameras to be centred on the mesh.
-# Once the part is added to the Blender scene, it can be both moved and rotated.
 
 part = scene.add_part(render_mesh1, sim_spat_dim=3)
 window = scene.add_part(render_mesh2, sim_spat_dim=3)
 # Set the part location
-window_location = np.array([0, 0, 20])
+window_location = np.array([0, 0, 200])
 blender.Tools.move_blender_obj(part=window, pos_world=window_location)
 # Set part rotation
 part_rotation = Rotation.from_euler("xyz", [0, 0, 0], degrees=True)
 blender.Tools.rotate_blender_obj(part=part, rot_world=part_rotation)
 
-# %%
-# The cameras can then be initialised. A stereo camera system is defined by a
-# `CameraStereo` object, which contains the intrinsic parameters of both cameras
-# as well as the extrinsic parameters between them.
-# There are two ways to initialise a `CameraStereo` object.
-# One way is to specify the camera parameters separately for each camera, create
-# a `CameraStereo` object, and then add the stereo system using the
-# `add_stereo_system` method.
-# The other method is to use a convenience function, as shown below.
-# This requires you to first initialise one camera. Then you can choose between
-# either a face-on or symmetric stereo system. Then, either of the
-# `symmetric_stereo_cameras` or `faceon_stereo_cameras` functions can be used to
-# initialise a `CameraStereo` object. The only input required to these functions
-# are the camera parameters for the first camera, and the desired stereo angle
-# between the two. The cameras can then be added to the Blender scene using the
-# `add_stereo_system` method.
-
-cam_data_0 = sens.CameraData(pixels_num=np.array([1540, 1040]),
+cam_data_0 = sens.CameraData(pixels_num=np.array([5328, 4608]),
                                pixels_size=np.array([0.00345, 0.00345]),
                                pos_world=np.array([0, 0, 400]),
                                rot_world=Rotation.from_euler("xyz", [0, 0, 0]),
@@ -125,35 +103,22 @@ if stereo_setup == "symmetric":
 elif stereo_setup == "faceon":
     stereo_system = sens.CameraTools.faceon_stereo_cameras(
         cam_data_0=cam_data_0,
-        stereo_angle=15.0)
+        stereo_angle=10.0)
 else:
     raise ValueError(f"Unknown stereo_setup: {stereo_setup}")
 
 cam0, cam1 = scene.add_stereo_system(stereo_system)
 
-# %%
-# Since this scene contains a stereo DIC system, a calibration file will be
-# required to run the images through a DIC engine.
-# A calibration file can be generated directly from the `CameraStereo` object.
-# The calibration file will be saved in `YAML` format. However, if you wish to
-# use MatchID to process the images, `save_calibration_mid` can be used instead
-# to save the calibration in a format readable by MatchID.
-# The calibration file will be saved to a sub-directory of the base directory
-# called "calibration".
 stereo_system.save_calibration(base_dir)
 
-# %%
-# A light can the be added to the scene.
-# Blender offers different light types: Point, Sun, Spot and Area.
-# The light can also be moved and rotated like the camera.
 light_data = blender.LightData(type=blender.LightType.POINT,
                                      pos_world=(0, 0, 400),
                                      rot_world=Rotation.from_euler("xyz",
                                                                    [0, 0, 0]),
-                                     energy=1)
+                                     energy=2)
 light = scene.add_light(light_data)
 light.location = (0, 0, 410)
-light.rotation_euler = (0, 0, 0) # NOTE: The default is an XYZ Euler angle
+light.rotation_euler = (0, 0.75, 0) # NOTE: The default is an XYZ Euler angle
 
 # Apply the speckle pattern
 material_data = blender.MaterialData()
@@ -161,22 +126,29 @@ speckle_path = dataset.dic_pattern_5mpx_path()
 # NOTE: If you wish to use a bigger camera, you will need to generate a
 # bigger speckle pattern generator
 
-# %%
-# A speckle pattern can then be applied to the sample.
-# Firstly, the material properties of the sample must be specified, but these
-# will all be defaulted if no inputs are provided.
-#The speckle pattern can then be specified by providing a path to an image file
-# with the pattern.
-# The mm/px resolution of the camera must also be specified in order to
-# correctly scale the speckle pattern.
-# It should be noted that for a bigger camera or sample you may need to generate
-# a larger speckle pattern.
 
 mm_px_resolution = sens.CameraTools.calculate_mm_px_resolution(cam_data_0)
 scene.add_speckle(part=part,
                   speckle_path=speckle_path,
                   mat_data=material_data,
                   mm_px_resolution=mm_px_resolution)
+
+# Adding the glass material
+bpy.data.materials.new("Material.001")
+bpy.data.materials["Material.001"].use_nodes = True
+mat_nodes = bpy.data.materials["Material.001"].node_tree.nodes
+# mix = mat_nodes.new(type="ShaderNodeMix")
+glass = mat_nodes.new(type="ShaderNodeBsdfGlass")
+glass.inputs["IOR"].default_value = 1.3777
+# node_tree = bpy.data.materials["Material.001"].node_tree
+# output = node_tree.nodes.new(type="ShaderNodeOutputMaterial")
+# node_tree.links.new(glass.outputs["Glass"], output.inputs["Surface"])
+
+inp = bpy.data.materials["Material.001"].node_tree.nodes["Material Output"].inputs["Surface"]
+outp = bpy.data.materials["Material.001"].node_tree.nodes["Glass BSDF"].outputs["BSDF"]
+bpy.data.materials["Material.001"].node_tree.links.new(inp,outp)
+bpy.data.objects["Part.001"].active_material = bpy.data.materials["Material.001"]
+
 
 # %%
 # Deforming the sample and rendering images
@@ -190,24 +162,11 @@ scene.add_speckle(part=part,
 render_data = blender.RenderData(cam_data=(stereo_system.cam_data_0,
                                             stereo_system.cam_data_1),
                                 base_dir=base_dir,
-                                threads=8)
+                                threads=8,
+                                samples=50)
 
-# %%
-# A series of deformed images can then be rendered.
-# This is done by passing in rendering parameters, as well as the
-# `RenderMeshData` object, the part(sample) and the spatial dimension of the
-# simulation.
-# This will automatically deform the sample, and render images from each camera
-# at each deformation timestep.
-# If `stage_image` is set to True, the image will be saved to disk, converted to
-# an array, deleted and the image array will be returned. This is due to the
-# fact that an image cannot be saved directly as an array through Blender.
-
-# scene.render_deformed_images(render_mesh=render_mesh,
-#                              sim_spat_dim=3,
-#                              render_data=render_data,
-#                              part=part,
-#                              stage_image=False)
+scene.render_single_image(render_data=render_data,
+                          stage_image=False)
 
 
 
