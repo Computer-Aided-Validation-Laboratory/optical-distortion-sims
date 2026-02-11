@@ -1,0 +1,51 @@
+================================================================================
+ BLENDER vs MITSUBA COMPARISON SUMMARY
+================================================================================
+
+ABSOLUTE ERRORS (pixels):
+--------------------------------------------------------------------------------
+Test Case                       Mean        RMS        Max     Median        Std
+--------------------------------------------------------------------------------
+No Window                      9.585     10.234     16.682      9.888      3.588
+Undeformed Window              9.684     10.339     16.864      9.897      3.620
+Deformed Window                9.796     10.429     16.900     10.101      3.577
+
+
+NORMALIZED ERRORS (relative to 'No Window' baseline):
+--------------------------------------------------------------------------------
+Test Case                   Mean Ratio    RMS Ratio    Max Ratio
+--------------------------------------------------------------------------------
+No Window                        1.000        1.000        1.000
+Undeformed Window                1.010        1.010        1.011
+Deformed Window                  1.022        1.019        1.013
+
+
+INTERPRETATION:
+--------------------------------------------------------------------------------
+1. BASELINE ('No Window'):
+   RMS error: 10.234 pixels
+   This represents the fundamental Blender-Mitsuba rendering difference
+   due to camera model, FOV, or coordinate system mismatch.
+
+2. WINDOW EFFECT:
+   Additional RMS error from window: 0.104 pixels
+   Window increases error by 1.0% of baseline
+   This is the optical distortion from the undeformed window.
+
+3. DEFORMATION EFFECT:
+   Additional RMS error from deformation: 0.090 pixels
+   Deformation increases error by 0.9% of baseline
+   This is the additional optical distortion from window deformation.
+
+4. TOTAL OPTICAL EFFECT:
+   Total additional RMS error: 0.194 pixels
+   Combined optical effects: 1.9% of baseline
+
+
+RECOMMENDATIONS:
+--------------------------------------------------------------------------------
+⚠ BASELINE ERROR IS HIGH (>5 pixels)
+  → Fix Blender-Mitsuba camera mismatch first before analyzing optical effects
+  → Check focal length, FOV, sensor size, coordinate system
+  → Baseline should be <1 pixel for accurate optical validation
+
