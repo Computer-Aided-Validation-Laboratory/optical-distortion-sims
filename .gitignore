@@ -212,3 +212,5 @@ pyvale-env/
 moose/HIVE_CAD/
 plotter_log.log
 .vscode/
+validation/mitsuba/output/deprecated/
+validation/blender/output/images/deprecated/
