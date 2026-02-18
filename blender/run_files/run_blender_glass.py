@@ -163,11 +163,11 @@ render_data = blender.RenderData(cam_data=(stereo_system.cam_data_0,
 # scene.render_single_image(render_data=render_data,
 #                           stage_image=False)
 
-scene.render_deformed_images(render_mesh=render_mesh2,
-                             sim_spat_dim=3,
-                             render_data=render_data,
-                             part=window,
-                             stage_image=False)
+# scene.render_deformed_images(render_mesh=render_mesh2,
+#                              sim_spat_dim=3,
+#                              render_data=render_data,
+#                              part=window,
+#                              stage_image=False)
 
 
 
@@ -180,4 +180,4 @@ print("Save directory of the image:", (render_data.base_dir / "blenderimages"))
 # There is also the option to save the scene as a Blender project file.
 # This file can be opened with the Blender GUI to view the scene.
 
-blender.Tools.save_blender_file(base_dir, override=True)
+blender.Tools.save_blender_file(base_dir, over_write=True)
