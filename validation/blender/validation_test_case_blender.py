@@ -19,7 +19,7 @@ import pyvale.dataset as dataset
 import pyvale.blender as blender
 import pyvale.mooseherder as mh
 
-data_path = Path.cwd() / "moose/input/circular_glass_big_out.e"
+data_path = Path.cwd() / "moose/input/circular_glass_out.e"
 sim_data = mh.ExodusLoader(data_path).load_all_sim_data()
 
 # %%
@@ -60,6 +60,8 @@ bg.inputs[0].default_value = (0.5, 0.5, 0.5, 1.0)  # Grey color
 
 # Work out what is a good size so that it fills the whole FOV
 target = scene.add_cal_target(target_size=np.array([90, 80, 10]))
+target_location = np.array([0, 0, 0]) 
+blender.Tools.move_blender_obj(part=target, pos_world=target_location)
 
 window = scene.add_part(render_mesh, sim_spat_dim=3)
 # Set the part location
@@ -120,6 +122,7 @@ print("Film transparent:", bpy.context.scene.render.film_transparent)
 print("World nodes enabled:", bpy.context.scene.world.use_nodes)
 print("Background color:", bg.inputs[0].default_value[:])
 print("Background strength:", bg.inputs[1].default_value)
+
 
 # %%
 # Deforming the sample and rendering images

@@ -6,9 +6,9 @@ ABSOLUTE ERRORS (pixels):
 --------------------------------------------------------------------------------
 Test Case                       Mean        RMS        Max     Median        Std
 --------------------------------------------------------------------------------
-No Window                      9.585     10.234     16.682      9.888      3.588
-Undeformed Window              9.684     10.339     16.864      9.897      3.620
-Deformed Window                9.796     10.429     16.900     10.101      3.577
+No Window                      0.037      0.040      0.092      0.036      0.016
+Undeformed Window              0.070      0.076      0.148      0.069      0.029
+Deformed Window                0.545      0.738      2.324      0.406      0.497
 
 
 NORMALIZED ERRORS (relative to 'No Window' baseline):
@@ -16,36 +16,35 @@ NORMALIZED ERRORS (relative to 'No Window' baseline):
 Test Case                   Mean Ratio    RMS Ratio    Max Ratio
 --------------------------------------------------------------------------------
 No Window                        1.000        1.000        1.000
-Undeformed Window                1.010        1.010        1.011
-Deformed Window                  1.022        1.019        1.013
+Undeformed Window                1.904        1.895        1.604
+Deformed Window                 14.734       18.373       25.212
 
 
 INTERPRETATION:
 --------------------------------------------------------------------------------
 1. BASELINE ('No Window'):
-   RMS error: 10.234 pixels
+   RMS error: 0.040 pixels
    This represents the fundamental Blender-Mitsuba rendering difference
    due to camera model, FOV, or coordinate system mismatch.
 
 2. WINDOW EFFECT:
-   Additional RMS error from window: 0.104 pixels
-   Window increases error by 1.0% of baseline
+   Additional RMS error from window: 0.036 pixels
+   Window increases error by 89.5% of baseline
    This is the optical distortion from the undeformed window.
 
 3. DEFORMATION EFFECT:
-   Additional RMS error from deformation: 0.090 pixels
-   Deformation increases error by 0.9% of baseline
+   Additional RMS error from deformation: 0.662 pixels
+   Deformation increases error by 1647.7% of baseline
    This is the additional optical distortion from window deformation.
 
 4. TOTAL OPTICAL EFFECT:
-   Total additional RMS error: 0.194 pixels
-   Combined optical effects: 1.9% of baseline
+   Total additional RMS error: 0.698 pixels
+   Combined optical effects: 1737.3% of baseline
 
 
 RECOMMENDATIONS:
 --------------------------------------------------------------------------------
-⚠ BASELINE ERROR IS HIGH (>5 pixels)
-  → Fix Blender-Mitsuba camera mismatch first before analyzing optical effects
-  → Check focal length, FOV, sensor size, coordinate system
-  → Baseline should be <1 pixel for accurate optical validation
+✓ BASELINE ERROR IS LOW (<1 pixel)
+  → Blender-Mitsuba rendering matches well
+  → Optical effects can be accurately measured
 

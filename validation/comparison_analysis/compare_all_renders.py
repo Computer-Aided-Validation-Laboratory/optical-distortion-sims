@@ -18,8 +18,8 @@ FILE_PATHS = {
     # Blender images
     'blender': {
         'no_window':   'validation/blender/output/images/blenderimage_0_no_window.tiff',
-        'undeformed':  'validation/blender/output/images/blenderimage_0.tiff',
-        'deformed':    'validation/blender/output/images/blenderimage_1.tiff',
+        'undeformed':  'validation/blender/output/images/blenderimage_0_big.tiff',
+        'deformed':    'validation/blender/output/images/blenderimage_1_big.tiff',
     },
     # Mitsuba images
     'mitsuba': {
@@ -451,19 +451,19 @@ def generate_comparison_plots(results: Dict[str, ComparisonResult], output_dir: 
 
 
 def generate_displacement_visualizations(results: Dict[str, ComparisonResult], output_dir: Path, test_cases, pattern_size):
-    """Generate displacement field visualizations for each case"""
+    """Generate difference heatmaps between Blender and Mitsuba for each case"""
     
     n_cases = len([c for c in test_cases if c[0] in results])
     if n_cases == 0:
         return
     
-    fig, axes = plt.subplots(n_cases, 3, figsize=(15, 5*n_cases))
+    fig, axes = plt.subplots(1, n_cases, figsize=(6*n_cases, 5))
     if n_cases == 1:
-        axes = axes.reshape(1, -1)
+        axes = [axes]
     
-    fig.suptitle('Displacement Field Analysis by Test Case', fontsize=16, fontweight='bold')
+    fig.suptitle('Blender vs Mitsuba: Corner Position Differences', fontsize=16, fontweight='bold')
     
-    row = 0
+    col = 0
     for case_id, case_name, _ in test_cases:
         if case_id not in results:
             continue
@@ -471,51 +471,32 @@ def generate_displacement_visualizations(results: Dict[str, ComparisonResult], o
         result = results[case_id]
         displacement_magnitude = np.linalg.norm(result.displacement, axis=2).flatten()
         
-        corners_reshaped = result.corners_a.reshape(-1, 2)
-        displacement_reshaped = result.displacement.reshape(-1, 2)
-        
-        # 1. Quiver plot
-        ax = axes[row, 0]
-        quiv = ax.quiver(corners_reshaped[:, 0], corners_reshaped[:, 1],
-                   displacement_reshaped[:, 0], displacement_reshaped[:, 1],
-                   displacement_magnitude, scale=10, scale_units='xy', cmap='jet')
-        plt.colorbar(quiv, ax=ax, label='Displacement (px)')
-        ax.set_title(f'{case_name}\nDisplacement Field')
-        ax.invert_yaxis()
-        ax.axis('equal')
-        ax.set_xlabel('X (pixels)')
-        ax.set_ylabel('Y (pixels)')
-        
-        # 2. Heatmap
-        ax = axes[row, 1]
+        # Reshape into grid
         displacement_grid = displacement_magnitude.reshape(pattern_size[1], pattern_size[0])
+        
+        ax = axes[col]
         im = ax.imshow(displacement_grid, cmap='hot', interpolation='nearest')
-        plt.colorbar(im, ax=ax, label='Displacement (px)')
-        ax.set_title(f'{case_name}\nMagnitude Heatmap')
+        cbar = plt.colorbar(im, ax=ax, label='Displacement (px)')
+        
+        mean_disp = result.mean_error
+        max_disp = result.max_error
+        rms_disp = result.rms_error
+        
+        ax.set_title(f'{case_name}\n'
+                    f'Mean: {mean_disp:.2f}px | RMS: {rms_disp:.2f}px | Max: {max_disp:.2f}px',
+                    fontsize=11)
         ax.set_xlabel('X corner index')
         ax.set_ylabel('Y corner index')
         
-        # 3. Histogram
-        ax = axes[row, 2]
-        ax.hist(displacement_magnitude, bins=30, edgecolor='black', alpha=0.7)
-        ax.axvline(result.mean_error, color='r', linestyle='--', linewidth=2, label=f'Mean: {result.mean_error:.2f}')
-        ax.axvline(result.rms_error, color='g', linestyle='--', linewidth=2, label=f'RMS: {result.rms_error:.2f}')
-        ax.set_xlabel('Displacement (pixels)')
-        ax.set_ylabel('Frequency')
-        ax.set_title(f'{case_name}\nDistribution')
-        ax.legend()
-        ax.grid(True, alpha=0.3)
-        
-        row += 1
+        col += 1
     
     plt.tight_layout()
     
-    output_path = output_dir / 'displacement_fields.png'
+    output_path = output_dir / 'blender_mitsuba_differences.png'
     plt.savefig(output_path, dpi=150, bbox_inches='tight')
     plt.close()
     
-    print(f"  ✓ Displacement fields: {output_path.name}")
-
+    print(f"  ✓ Difference heatmaps: {output_path.name}")
 
 def generate_relative_displacement_analysis(results, output_dir, pattern_size, file_paths):
     """
@@ -551,18 +532,18 @@ def generate_relative_displacement_analysis(results, output_dir, pattern_size, f
     
     engines = ['blender', 'mitsuba']
     
-    fig, axes = plt.subplots(len(engines), len(cases_to_compare), 
-                             figsize=(7*len(cases_to_compare), 6*len(engines)))
+    # Create 2 rows (cases) × 3 columns (Blender, Mitsuba, Difference)
+    fig, axes = plt.subplots(len(cases_to_compare), 3, 
+                             figsize=(18, 6*len(cases_to_compare)))
     
-    if len(engines) == 1:
-        axes = axes.reshape(1, -1)
     if len(cases_to_compare) == 1:
-        axes = axes.reshape(-1, 1)
+        axes = axes.reshape(1, -1)
     
     fig.suptitle('Relative Displacement from "No Window" Baseline', 
                  fontsize=16, fontweight='bold')
 
     
+    # Load baseline corners for both engines
     baseline_corners = {}
     for engine in engines:
         baseline_path = Path(file_paths[engine]['no_window'])
@@ -584,22 +565,26 @@ def generate_relative_displacement_analysis(results, output_dir, pattern_size, f
         else:
             print(f"    Failed to find corners in baseline for {engine}")
     
-    for row, engine in enumerate(engines):
-        engine_title = engine.capitalize()
+    # Store relative displacements for difference calculation
+    relative_displacements = {}
+    
+    # Process each case (row)
+    for row, (case_id, case_name) in enumerate(cases_to_compare):
+        relative_displacements[case_id] = {}
         
-        if engine not in baseline_corners:
-            for col in range(len(cases_to_compare)):
-                axes[row, col].text(0.5, 0.5, f'{engine_title}\nBaseline Missing',
-                                   ha='center', va='center', fontsize=14,
-                                   transform=axes[row, col].transAxes)
-                axes[row, col].set_title(f'{engine_title}: Baseline Missing')
-            continue
-        
-        baseline = baseline_corners[engine]
-        
-        for col, (case_id, case_name) in enumerate(cases_to_compare):
+        # Process each engine (columns 0 and 1)
+        for col, engine in enumerate(engines):
             ax = axes[row, col]
+            engine_title = engine.capitalize()
             
+            if engine not in baseline_corners:
+                ax.text(0.5, 0.5, f'{engine_title}\nBaseline Missing',
+                       ha='center', va='center', fontsize=14,
+                       transform=ax.transAxes)
+                ax.set_title(f'{engine_title}: Baseline Missing')
+                continue
+            
+            baseline = baseline_corners[engine]
             case_path = Path(file_paths[engine][case_id])
             
             if not case_path.exists():
@@ -630,6 +615,9 @@ def generate_relative_displacement_analysis(results, output_dir, pattern_size, f
             relative_displacement = case_corners - baseline
             relative_magnitude = np.linalg.norm(relative_displacement, axis=2).flatten()
             
+            # Store for difference calculation
+            relative_displacements[case_id][engine] = relative_displacement
+            
             displacement_grid = relative_magnitude.reshape(pattern_size[1], pattern_size[0])
             
             im = ax.imshow(displacement_grid, cmap='hot', interpolation='nearest')
@@ -645,6 +633,41 @@ def generate_relative_displacement_analysis(results, output_dir, pattern_size, f
             ax.set_ylabel('Y corner index')
             
             print(f"    ✓ {engine_title} {case_name}: mean={mean_disp:.2f}px, max={max_disp:.2f}px")
+        
+        # Plot difference (Mitsuba - Blender) in column 2
+        ax = axes[row, 2]
+        
+        # Check if we have data for both engines
+        if ('blender' not in relative_displacements[case_id] or
+            'mitsuba' not in relative_displacements[case_id]):
+            
+            ax.text(0.5, 0.5, f'Missing Data\nfor Difference',
+                   ha='center', va='center', fontsize=14,
+                   transform=ax.transAxes)
+            ax.set_title(f'Difference: {case_name} (Incomplete)')
+            continue
+        
+        # Calculate difference: Mitsuba - Blender
+        diff = (relative_displacements[case_id]['mitsuba'] - 
+                relative_displacements[case_id]['blender'])
+        diff_magnitude = np.linalg.norm(diff, axis=2).flatten()
+        
+        diff_grid = diff_magnitude.reshape(pattern_size[1], pattern_size[0])
+        
+        # Use a diverging colormap for differences
+        im = ax.imshow(diff_grid, cmap='RdBu_r', interpolation='nearest')
+        cbar = plt.colorbar(im, ax=ax, label='Difference (px)')
+        
+        mean_diff = np.mean(diff_magnitude)
+        max_diff = np.max(diff_magnitude)
+        
+        ax.set_title(f'Mitsuba - Blender: {case_name}\n'
+                    f'Mean: {mean_diff:.2f}px, Max: {max_diff:.2f}px',
+                    fontsize=11)
+        ax.set_xlabel('X corner index')
+        ax.set_ylabel('Y corner index')
+        
+        print(f"    ✓ Difference {case_name}: mean={mean_diff:.2f}px, max={max_diff:.2f}px")
     
     plt.tight_layout()
     
@@ -653,7 +676,6 @@ def generate_relative_displacement_analysis(results, output_dir, pattern_size, f
     plt.close()
     
     print(f"  ✓ Relative displacement plot: {output_path.name}")
-
 
 def main():
     """Main execution function"""

@@ -39,8 +39,8 @@ def export_moose_to_mitsuba(data_path, output_filename):
                                             sim_spat_dim=3,
                                             field_disp_keys=disp_comps)
     
-    # timestep = render_mesh2.fields_render.shape[1] - 1
-    timestep = 0
+    timestep = render_mesh2.fields_render.shape[1] - 1
+    # timestep = 0
     deformed_nodes = pyvale.sensorsim.get_deformed_nodes(timestep,
                                                          render_mesh2)
     
@@ -66,7 +66,7 @@ def export_moose_to_mitsuba(data_path, output_filename):
 def main():
     os.environ["DRJIT_NUM_THREADS"] = "16"
     mitsuba.set_variant('llvm_ad_mono')
-    data_path = Path.cwd() / "moose/input/circular_glass_big_out.e"
+    data_path = Path.cwd() / "moose/input/circular_glass_out.e"
 
     output_dir = Path.cwd() / "validation/mitsuba/output"
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -108,7 +108,7 @@ def main():
         
         # Integrator (path tracer)
         'integrator': {
-            'type': 'path',
+            'type': 'photomapper',
             'max_depth': 8, 
         },
         
