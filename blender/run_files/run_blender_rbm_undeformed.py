@@ -33,7 +33,7 @@ import pyvale.mooseherder as mh
 data_path1 = dataset.render_mechanical_3d_path()
 sim_data1 = mh.ExodusLoader(data_path1).load_all_sim_data()
 
-data_path2 = Path.cwd() / "moose/input/circular_glass_out.e"
+data_path2 = Path.cwd() / "moose/input/circular_glass_50p8_out.e"
 sim_data2 = mh.ExodusLoader(data_path2).load_all_sim_data()
 
 # %%
@@ -81,7 +81,7 @@ scene = blender.Scene()
 # part = scene.add_part(render_mesh1, sim_spat_dim=3)
 window = scene.add_part(render_mesh2, sim_spat_dim=3)
 
-window_location = np.array([0, 0, 200])
+window_location = np.array([0, 0, 350])
 blender.Tools.move_blender_obj(part=window, pos_world=window_location)
 
 sample = scene.add_cal_target(target_size=np.array([50, 35, 10]))
@@ -90,8 +90,8 @@ blender.Tools.move_blender_obj(part=sample, pos_world=sample_location)
 
 
 calib_path = Path.cwd() / "blender/calibration.yaml"
-pos_world_0 = (-2.5, 0, 393.5)
-rot_world_0 = Rotation.from_euler("xyz", [0, 0, 0], degrees=True)
+pos_world_0 = (-17.5, 11.2, 393.5)
+rot_world_0 = Rotation.from_euler("xyz", [0, -2.3, 0], degrees=True)
 focal_length = 50
 stereo_system = sens.camerastereo.CameraStereo.from_calibration(calib_path, pos_world_0, rot_world_0, focal_length)
 
@@ -103,7 +103,7 @@ light_data = blender.LightData(type=blender.LightType.POINT,
                                      pos_world=(200, 0, 200),
                                      rot_world=Rotation.from_euler("xyz",
                                                                    [0, 0.8, 0]),
-                                     energy=3)
+                                     energy=3.5)
 light = scene.add_light(light_data)
 # light.location = (200, 0, 200)
 # light.rotation_euler = (0, 0.785, 0) # NOTE: The default is an XYZ Euler angle
@@ -147,8 +147,8 @@ bpy.data.objects["Part"].active_material = bpy.data.materials["Material.001"]
 render_data = blender.RenderData(cam_data=(stereo_system.cam_data_0,
                                             stereo_system.cam_data_1),
                                 base_dir=base_dir,
-                                threads=16,
-                                samples=1)
+                                threads=240,
+                                samples=256)
 
 
 # Rigid body motion images
