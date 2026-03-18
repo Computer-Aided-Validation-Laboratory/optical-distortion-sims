@@ -55,7 +55,7 @@ moose_runner.set_run_opts(n_tasks = 1,
 # Let's grab a simple thermo-mechanical cube test case from pyvale's moose
 # simulation library and we will set this as the input file to run with our
 # 'runner'.
-moose_input = Path.cwd() / "moose/input/circular_glass_big.i"
+moose_input = Path.cwd() / "moose/input/circular_glass_50p8.i"
 moose_runner.set_input_file(moose_input)
 
 #%%
