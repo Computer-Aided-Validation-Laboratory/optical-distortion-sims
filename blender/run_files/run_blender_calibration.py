@@ -33,7 +33,7 @@ import pyvale.mooseherder as mh
 data_path1 = dataset.render_mechanical_3d_path()
 sim_data1 = mh.ExodusLoader(data_path1).load_all_sim_data()
 
-data_path2 = Path.cwd() / "moose/input/circular_glass_out.e"
+data_path2 = Path.cwd() / "moose/input/circular_glass_50p8_out.e"
 sim_data2 = mh.ExodusLoader(data_path2).load_all_sim_data()
 
 # %%
@@ -77,18 +77,19 @@ base_dir = Path.cwd() / "blender/glass/calibration_images"
 # objects and actions necessary are then methods of this class.
 scene = blender.Scene()
 
-
 # part = scene.add_part(render_mesh1, sim_spat_dim=3)
 window = scene.add_part(render_mesh2, sim_spat_dim=3)
 
-window_location = np.array([0, 0, 200])
+window_location = np.array([0, 0, 350])
 blender.Tools.move_blender_obj(part=window, pos_world=window_location)
 
-target = scene.add_cal_target(target_size=np.array([150, 100, 10]))
+target = scene.add_cal_target(target_size=np.array([75, 50, 10]))
+# target_location = np.array([50, 40, 0])
+# blender.Tools.move_blender_obj(part=target, pos_world=target_location)
 
 calib_path = Path.cwd() / "blender/calibration.yaml"
-pos_world_0 = (-2.5, 0, 393.5)
-rot_world_0 = Rotation.from_euler("xyz", [0, 0, 0], degrees=True)
+pos_world_0 = (-17.5, 11.2, 393.5)
+rot_world_0 = Rotation.from_euler("xyz", [0, -2.3, 0], degrees=True)
 focal_length = 50
 stereo_system = sens.camerastereo.CameraStereo.from_calibration(calib_path, pos_world_0, rot_world_0, focal_length)
 
@@ -140,16 +141,19 @@ render_data = blender.RenderData(cam_data=(stereo_system.cam_data_0,
                                 base_dir=base_dir,
                                 dir_name="calibration_images",
                                 threads=16,
-                                samples=32)
+                                samples=1)
 
 calibration_data = blender.CalibrationData(angle_lims=(-10, 10),
                                           angle_step=10,
                                           plunge_lims=(-10, 10),
                                           plunge_step=10)
 
-blender.Tools.render_calibration_images(render_data,
-                                        calibration_data,
-                                        target)
+# blender.Tools.render_calibration_images(render_data,
+#                                         calibration_data,
+#                                         target)
+
+scene.render_single_image(render_data=render_data,
+                          stage_image=False)
 
 number_calibration_images = blender.Tools.number_calibration_images(calibration_data)
 print("Number of calibration images to be rendered:", number_calibration_images)

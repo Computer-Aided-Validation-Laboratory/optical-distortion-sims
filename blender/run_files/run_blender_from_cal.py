@@ -77,21 +77,19 @@ base_dir = Path.cwd() / "blender/glass"
 # objects and actions necessary are then methods of this class.
 scene = blender.Scene()
 
-
 # part = scene.add_part(render_mesh1, sim_spat_dim=3)
 window = scene.add_part(render_mesh2, sim_spat_dim=3)
 
-window_location = np.array([0, 0, 200])
+window_location = np.array([0, 0, 350])
 blender.Tools.move_blender_obj(part=window, pos_world=window_location)
 
 sample = scene.add_cal_target(target_size=np.array([50, 35, 10]))
 sample_location = np.array([0, 0, 0])
 blender.Tools.move_blender_obj(part=sample, pos_world=sample_location)
 
-
 calib_path = Path.cwd() / "blender/calibration.yaml"
-pos_world_0 = (-2.5, 0, 393.5)
-rot_world_0 = Rotation.from_euler("xyz", [0, 0, 0], degrees=True)
+pos_world_0 = (-15, 11.2, 393.5)
+rot_world_0 = Rotation.from_euler("xyz", [0, -2, 0], degrees=True)
 focal_length = 50
 stereo_system = sens.camerastereo.CameraStereo.from_calibration(calib_path, pos_world_0, rot_world_0, focal_length)
 
@@ -103,7 +101,7 @@ light_data = blender.LightData(type=blender.LightType.POINT,
                                      pos_world=(200, 0, 200),
                                      rot_world=Rotation.from_euler("xyz",
                                                                    [0, 0.8, 0]),
-                                     energy=3)
+                                     energy=3.5)
 light = scene.add_light(light_data)
 # light.location = (200, 0, 200)
 # light.rotation_euler = (0, 0.785, 0) # NOTE: The default is an XYZ Euler angle
@@ -148,16 +146,16 @@ render_data = blender.RenderData(cam_data=(stereo_system.cam_data_0,
                                             stereo_system.cam_data_1),
                                 base_dir=base_dir,
                                 threads=16,
-                                samples=10)
+                                samples=1)
 
-# scene.render_single_image(render_data=render_data,
-#                           stage_image=False)
+scene.render_single_image(render_data=render_data,
+                          stage_image=False)
 
-scene.render_deformed_images(render_mesh=render_mesh2,
-                             sim_spat_dim=3,
-                             render_data=render_data,
-                             part=window,
-                             stage_image=False)
+# scene.render_deformed_images(render_mesh=render_mesh2,
+#                              sim_spat_dim=3,
+#                              render_data=render_data,
+#                              part=window,
+#                              stage_image=False)
 
 
 
