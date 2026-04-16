@@ -94,7 +94,8 @@ pos_world_0 = (-17.5, 11.2, 393.5)
 rot_world_0 = Rotation.from_euler("xyz", [0, -2.3, 0], degrees=True)
 focal_length = 50
 stereo_system = sens.camerastereo.CameraStereo.from_calibration(calib_path, pos_world_0, rot_world_0, focal_length)
-
+stereo_system.cam_data_0.pixels_num = np.array([5328, 4608])
+stereo_system.cam_data_1.pixels_num = np.array([5328, 4608])
 cam0, cam1 = scene.add_stereo_system(stereo_system)
 
 stereo_system.save_calibration(base_dir)
@@ -134,6 +135,12 @@ outp = bpy.data.materials["Material.001"].node_tree.nodes["Glass BSDF"].outputs[
 bpy.data.materials["Material.001"].node_tree.links.new(inp,outp)
 bpy.data.objects["Part"].active_material = bpy.data.materials["Material.001"]
 
+# Add this after scene = blender.Scene() and before the render loop
+bpy.context.scene.view_settings.view_transform = 'Standard'
+bpy.context.scene.view_settings.exposure = 0.0
+bpy.context.scene.view_settings.gamma = 1.0
+
+bpy.data.objects["Part"].data.polygons.foreach_set("use_smooth", [True] * len(bpy.data.objects["Part"].data.polygons))
 
 # %%
 # Deforming the sample and rendering images
