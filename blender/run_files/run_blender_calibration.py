@@ -67,7 +67,7 @@ render_mesh2 = sens.create_render_mesh(sim_data2,
 # (e.g. blenderimages).
 # If no base directory is specified, it will be set as your home directory.
 
-base_dir = Path.cwd() / "blender/glass/calibration_images"
+base_dir = Path("calibration/calibration_fix_extrinsics2")
 
 # %%
 # Creating the scene
@@ -91,7 +91,7 @@ calib_path = Path.cwd() / "blender/calibration.yaml"
 pos_world_0 = (-17.5, 11.2, 393.5)
 rot_world_0 = Rotation.from_euler("xyz", [0, -2.3, 0], degrees=True)
 focal_length = 50
-stereo_system = sens.camerastereo.CameraStereo.from_calibration(calib_path, pos_world_0, rot_world_0, focal_length)
+stereo_system = sens.camerastereo.CameraStereo.from_calibration(calib_path, pos_world_0, rot_world_0, focal_length, pixels_num=np.array([5328, 4608]))
 
 cam0, cam1 = scene.add_stereo_system(stereo_system)
 
@@ -140,7 +140,7 @@ render_data = blender.RenderData(cam_data=(stereo_system.cam_data_0,
                                             stereo_system.cam_data_1),
                                 base_dir=base_dir,
                                 dir_name="calibration_images",
-                                threads=16,
+                                threads=240,
                                 samples=1)
 
 calibration_data = blender.CalibrationData(angle_lims=(-10, 10),
@@ -148,12 +148,12 @@ calibration_data = blender.CalibrationData(angle_lims=(-10, 10),
                                           plunge_lims=(-10, 10),
                                           plunge_step=10)
 
-# blender.Tools.render_calibration_images(render_data,
-#                                         calibration_data,
-#                                         target)
+blender.Tools.render_calibration_images(render_data,
+                                        calibration_data,
+                                        target)
 
-scene.render_single_image(render_data=render_data,
-                          stage_image=False)
+#scene.render_single_image(render_data=render_data,
+#                          stage_image=False)
 
 number_calibration_images = blender.Tools.number_calibration_images(calibration_data)
 print("Number of calibration images to be rendered:", number_calibration_images)
