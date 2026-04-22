@@ -133,6 +133,8 @@ outp = bpy.data.materials["Material.001"].node_tree.nodes["Glass BSDF"].outputs[
 bpy.data.materials["Material.001"].node_tree.links.new(inp,outp)
 bpy.data.objects["Part"].active_material = bpy.data.materials["Material.001"]
 
+bpy.data.objects["Part"].data.polygons.foreach_set("use_smooth", [True] * len(bpy.data.objects["Part"].data.polygons))
+
 
 # %%
 # Deforming the sample and rendering images
