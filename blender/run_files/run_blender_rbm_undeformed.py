@@ -67,7 +67,7 @@ render_mesh2 = sens.create_render_mesh(sim_data2,
 # (e.g. blenderimages).
 # If no base directory is specified, it will be set as your home directory.
 
-base_dir = Path.cwd() / "blender/glass/rbm_undeformed"
+base_dir = Path.cwd() / "blender/glass/rbm_undeformed_blender_distortion"
 
 # %%
 # Creating the scene
