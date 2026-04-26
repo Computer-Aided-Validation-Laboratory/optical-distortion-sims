@@ -214,3 +214,7 @@ plotter_log.log
 .vscode/
 validation/mitsuba/output/deprecated/
 validation/blender/output/images/deprecated/
+
+# Generated figures — kept locally, not tracked
+figures/*
+!figures/.gitkeep

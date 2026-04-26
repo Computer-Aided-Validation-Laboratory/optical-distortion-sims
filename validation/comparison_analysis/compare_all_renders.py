@@ -18,14 +18,14 @@ FILE_PATHS = {
     # Blender images
     'blender': {
         'no_window':   'validation/blender/output/images/blenderimage_0_no_window.tiff',
-        'undeformed':  'validation/blender/output/images/blenderimage_0_big.tiff',
-        'deformed':    'validation/blender/output/images/blenderimage_1_big.tiff',
+        'undeformed':  'validation/blender/output/images/blenderimage_0.tiff',
+        'deformed':    'validation/blender/output/images/blenderimage_1.tiff',
     },
     # Mitsuba images
     'mitsuba': {
         'no_window':   'validation/mitsuba/output/mitsuba_render_no_window.png',
-        'undeformed':  'validation/mitsuba/output/mitsuba_render_0_big.png',
-        'deformed':    'validation/mitsuba/output/mitsuba_render_1_big.png',
+        'undeformed':  'validation/mitsuba/output/mitsuba_render_0_5MPx.png',
+        'deformed':    'validation/mitsuba/output/mitsuba_render_1_5MPx.png',
     }
 }
 
@@ -460,8 +460,6 @@ def generate_displacement_visualizations(results: Dict[str, ComparisonResult], o
     fig, axes = plt.subplots(1, n_cases, figsize=(6*n_cases, 5))
     if n_cases == 1:
         axes = [axes]
-    
-    fig.suptitle('Blender vs Mitsuba: Corner Position Differences', fontsize=16, fontweight='bold')
     
     col = 0
     for case_id, case_name, _ in test_cases:

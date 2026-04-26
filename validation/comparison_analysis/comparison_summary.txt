@@ -8,7 +8,7 @@ Test Case                       Mean        RMS        Max     Median        Std
 --------------------------------------------------------------------------------
 No Window                      0.037      0.040      0.092      0.036      0.016
 Undeformed Window              0.070      0.076      0.148      0.069      0.029
-Deformed Window                0.545      0.738      2.324      0.406      0.497
+Deformed Window                0.070      0.076      0.149      0.067      0.030
 
 
 NORMALIZED ERRORS (relative to 'No Window' baseline):
@@ -17,7 +17,7 @@ Test Case                   Mean Ratio    RMS Ratio    Max Ratio
 --------------------------------------------------------------------------------
 No Window                        1.000        1.000        1.000
 Undeformed Window                1.904        1.895        1.604
-Deformed Window                 14.734       18.373       25.212
+Deformed Window                  1.888        1.897        1.616
 
 
 INTERPRETATION:
@@ -33,13 +33,13 @@ INTERPRETATION:
    This is the optical distortion from the undeformed window.
 
 3. DEFORMATION EFFECT:
-   Additional RMS error from deformation: 0.662 pixels
-   Deformation increases error by 1647.7% of baseline
+   Additional RMS error from deformation: 0.000 pixels
+   Deformation increases error by 0.2% of baseline
    This is the additional optical distortion from window deformation.
 
 4. TOTAL OPTICAL EFFECT:
-   Total additional RMS error: 0.698 pixels
-   Combined optical effects: 1737.3% of baseline
+   Total additional RMS error: 0.036 pixels
+   Combined optical effects: 89.7% of baseline
 
 
 RECOMMENDATIONS:
