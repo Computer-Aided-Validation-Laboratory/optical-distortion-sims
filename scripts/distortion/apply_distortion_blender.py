@@ -172,7 +172,7 @@ def main():
     parser.add_argument(
         "--calib",
         type=Path,
-        default=Path("calibration/calibration.yaml"),
+        default=Path(__file__).resolve().parents[2] / "configs/calibration.yaml",
         help="Path to calibration YAML file",
     )
     parser.add_argument(

@@ -154,12 +154,12 @@ def blender_distort(image_path: Path,
 # ── Main comparison ─────────────────────────────────────────────────────────
 
 def main():
-    base = Path("/home/lornasibson/workspace/optical-distortion-sims")
-    calib_path = base / "calibration/calibration.yaml"
+    repo_root = Path(__file__).resolve().parents[2]
+    calib_path = repo_root / "configs/calibration.yaml"
     params = load_calibration(calib_path)
 
-    # Use first Cam0 image
-    test_image_path = base / "blender/glass/rbm/images/blenderimage_1_0.tiff"
+    # Use first Cam0 image (lives in the sibling optical-distortion-images repo)
+    test_image_path = repo_root.parent / "optical-distortion-images/blender/glass/rbm/images/blenderimage_1_0.tiff"
     cam_id = 0
 
     print(f"Test image: {test_image_path}")
@@ -174,13 +174,15 @@ def main():
     print(f"  Image shape: {image.shape}, dtype: {image.dtype}")
     result_opencv = opencv_distort(image, params, cam_id)
 
-    opencv_out = base / "comparison_opencv.tiff"
+    figures_dir = repo_root / "figures"
+    figures_dir.mkdir(exist_ok=True)
+    opencv_out = figures_dir / "comparison_opencv.tiff"
     cv2.imwrite(str(opencv_out), result_opencv)
     print(f"  Saved to {opencv_out}")
 
     # Blender distortion
     print("\nRunning Blender distortion...")
-    blender_out = base / "comparison_blender.tiff"
+    blender_out = figures_dir / "comparison_blender.tiff"
     result_blender = blender_distort(test_image_path, blender_out,
                                      params, cam_id)
     print(f"  Saved to {blender_out}")
@@ -248,7 +250,7 @@ def main():
         axes[1, 1].text(0.5, 0.5, "All pixels identical",
                         ha='center', va='center', fontsize=14)
 
-    fig_path = base / "distortion_comparison.png"
+    fig_path = figures_dir / "distortion_comparison.png"
     plt.tight_layout()
     plt.savefig(fig_path, dpi=150)
     print(f"\nComparison figure saved to {fig_path}")
