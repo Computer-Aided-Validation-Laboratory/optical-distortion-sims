@@ -67,7 +67,7 @@ render_mesh2 = sens.create_render_mesh(sim_data2,
 # (e.g. blenderimages).
 # If no base directory is specified, it will be set as your home directory.
 
-base_dir = Path("calibration/calibration_fix_extrinsics2")
+base_dir = Path("calibration/calibration_no_blender_distortion")
 
 # %%
 # Creating the scene
@@ -141,7 +141,8 @@ render_data = blender.RenderData(cam_data=(stereo_system.cam_data_0,
                                 base_dir=base_dir,
                                 dir_name="calibration_images",
                                 threads=240,
-                                samples=1)
+                                samples=10,
+                                apply_distortion=False)
 
 calibration_data = blender.CalibrationData(angle_lims=(-10, 10),
                                           angle_step=10,
